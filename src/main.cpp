@@ -28,13 +28,36 @@ std::string hasData(std::string s) {
   return "";
 }
 
-int main()
+int main(int argc, char** argv)
 {
   uWS::Hub h;
 
   PID pid;
   // TODO: Initialize the pid variable.
-  pid.Init(0,0,0);
+  double Kp = 0.04;
+  double Ki= 0.01;
+  double Kd = 10;
+
+  float val;
+  if (argc > 1) {
+    sscanf(argv[1],"%f",&val);
+    if (val >= 0) 
+      Kp = val;
+  }
+
+  if (argc > 2) {
+    sscanf(argv[2],"%f",&val);
+    if (val >= 0) 
+      Ki = val;
+  }
+
+  if (argc > 3) {
+    sscanf(argv[3],"%f",&val);
+    if (val >= 0) 
+      Kd = val;
+  }
+
+  pid.Init(Kp, Ki, Kd);
 
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
@@ -59,7 +82,7 @@ int main()
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
-          steer_value = -1 *  cte * 0.035;
+          steer_value = pid.UpdateError(cte);
           if (steer_value < -1)
             steer_value = -1;
           if (steer_value > 1)

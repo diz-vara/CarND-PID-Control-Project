@@ -2,7 +2,7 @@
 #define PID_H
 
 class PID {
-public:
+private:
   /*
   * Errors
   */
@@ -16,6 +16,13 @@ public:
   double Kp;
   double Ki;
   double Kd;
+
+  //staste
+  unsigned long idx;
+  double prev_cte;
+  double sum_cte;
+
+public:
 
   /*
   * Constructor
@@ -35,7 +42,7 @@ public:
   /*
   * Update the PID error variables given cross track error.
   */
-  void UpdateError(double cte);
+  double UpdateError(double cte);
 
   /*
   * Calculate the total PID error.
