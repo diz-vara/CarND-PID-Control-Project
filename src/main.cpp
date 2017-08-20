@@ -32,7 +32,7 @@ static PID pid;
 static PID pid2;
 static double It, Kt;
 
-const int Period = 256;
+const int Period = 64;
 
 void procMeasAndControl (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
   // "42" at the start of the message means there's a websocket message event.
@@ -43,6 +43,11 @@ void procMeasAndControl (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t leng
     static unsigned int cnt(0);
     static double bestError(-1);
     static double sumErr(0);
+
+    static double dKp = 0.01;
+
+    bool bNeg(false);
+
     auto s = hasData(std::string(data).substr(0, length));
     if (s != "") {
       auto j = json::parse(s);
@@ -67,15 +72,29 @@ void procMeasAndControl (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t leng
         
         if (cnt++ >= Period) {
           sumErr = sumErr / static_cast<double>(Period);
-          std::cout << sumErr << std::endl;
+          std::cout << sumErr << ", Kp = " << pid.getKp() << ", dKp = " << dKp << std::endl;
           if (bestError < 0) {
             //first time - init
             bestError = sumErr;
           } 
           else {
             //twiddle
+            if (sumErr < bestError) {
+              dKp *= 1.1;
+              bestError = sumErr;
+            }
+            else {
+              dKp *= -1;
+              if (!bNeg)
+                pid.updateKp(dKp);
+              else
+                dKp *= 0.9;
+              bNeg = !bNeg;  
+            }
 
           }
+
+          pid.updateKp(dKp);
 
           //reset error and counter
           sumErr = 0;

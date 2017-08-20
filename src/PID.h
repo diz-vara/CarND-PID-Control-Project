@@ -17,6 +17,11 @@ private:
   double Ki;
   double Kd;
 
+  //increments
+  double dKp;
+  double dKi;
+  double dKd;
+
   //staste
   unsigned long idx;
   double prev_cte;
@@ -43,6 +48,9 @@ public:
   * Update the PID error variables given cross track error.
   */
   double UpdateError(double cte);
+  void setKp(double _Kp) {Kp = _Kp;}
+  double getKp() const {return Kp;}
+  double updateKp(double _dKp) { Kp = Kp + _dKp; return Kp;}
 
   /*
   * Calculate the total PID error.
