@@ -91,16 +91,16 @@ int main(int argc, char** argv)
             steer_value = 1.;
           
           // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+          //std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
 
           //updating throttle proportional to the cos(angle)
           double cos_angle = cos(angle);
-          msgJson["throttle"] = cos_angle * cos_angle * 0.8; // 0.3;
+          msgJson["throttle"] = cos_angle * cos_angle * 0.85; // 0.3;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {

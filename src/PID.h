@@ -28,7 +28,11 @@ private:
   double dKi;
   double dKp;
   double dKd;
-
+  unsigned int cnt;
+  double sum_sqerr;
+  double best_err;
+  int period;
+  bool bNeg;
 public:
 
   /*
