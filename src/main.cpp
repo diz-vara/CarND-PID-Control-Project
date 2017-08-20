@@ -82,18 +82,23 @@ int main(int argc, char** argv)
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
-          steer_value = pid.UpdateError(cte);
-          if (steer_value < -1)
-            steer_value = -1;
-          if (steer_value > 1)
-            steer_value = 1;
+          pid.UpdateError(cte);
+
+          steer_value = pid.TotalError();
+          if (steer_value < -1.)
+            steer_value = -1.;
+          if (steer_value > 1.)
+            steer_value = 1.;
           
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+
+          //updating throttle proportional to the cos(angle)
+          double cos_angle = cos(angle);
+          msgJson["throttle"] = cos_angle * cos_angle * 0.8; // 0.3;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);

@@ -17,10 +17,17 @@ private:
   double Ki;
   double Kd;
 
-  //staste
+  //state
   unsigned long idx;
-  double prev_cte;
-  double sum_cte;
+  double prev_err;
+  double sum_err;
+  double curr_err;
+  double diff_err;
+
+  //twiddle 
+  double dKi;
+  double dKp;
+  double dKd;
 
 public:
 
@@ -42,7 +49,7 @@ public:
   /*
   * Update the PID error variables given cross track error.
   */
-  double UpdateError(double cte);
+  void UpdateError(double cte);
 
   /*
   * Calculate the total PID error.
