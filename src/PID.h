@@ -18,21 +18,26 @@ private:
   double Kd;
 
   //state
-  unsigned long idx;
+  unsigned short idx;
   double prev_err;
   double sum_err;
   double curr_err;
   double diff_err;
 
+  double* pK[3];
+  double* pdK[3];
+
   //twiddle 
   double dKi;
   double dKp;
   double dKd;
-  unsigned int cnt;
+  int cnt;
   double sum_sqerr;
   double best_err;
   int period;
   bool bNeg;
+
+  bool Twiddle();
 public:
 
   /*
@@ -59,6 +64,8 @@ public:
   * Calculate the total PID error.
   */
   double TotalError();
+
+  void Restart();
 };
 
 #endif /* PID_H */

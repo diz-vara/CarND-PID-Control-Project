@@ -67,6 +67,7 @@ int main(int argc, char** argv)
     if (length && length > 2 && data[0] == '4' && data[1] == '2')
     {
       auto s = hasData(std::string(data).substr(0, length));
+      static double maxSpeed(0);
       if (s != "") {
         auto j = json::parse(s);
         std::string event = j[0].get<std::string>();
@@ -76,12 +77,22 @@ int main(int argc, char** argv)
           double speed = std::stod(j[1]["speed"].get<std::string>());
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
           double steer_value;
-          /*
-          * TODO: Calcuate steering value here, remember the steering value is
-          * [-1, 1].
-          * NOTE: Feel free to play around with the throttle and speed. Maybe use
-          * another PID controller to control the speed!
-          */
+          
+          if (maxSpeed < speed)
+            maxSpeed = speed;
+
+          //stopped: reset
+          if (cte > 5 || (speed < 10. && maxSpeed > 10.) ) {
+            std::string msg_reset = "42[\"steer\",{\"steering_angle\":0, \"throttle\":1}]";
+            std::cout << "Sending reset message " << msg_reset << std::endl;
+            ws.send( msg_reset.data(), msg_reset.length(), uWS::OpCode::TEXT ); 
+            msg_reset = "42[\"reset\",{}]";
+            ws.send( msg_reset.data(), msg_reset.length(), uWS::OpCode::TEXT ); 
+            maxSpeed = 0; 
+            //TODO: reset PID
+            pid.Restart();
+          }
+
           pid.UpdateError(cte);
 
           steer_value = pid.TotalError();
