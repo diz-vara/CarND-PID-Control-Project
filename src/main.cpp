@@ -34,9 +34,9 @@ int main(int argc, char** argv)
 
   PID pid;
   // TODO: Initialize the pid variable.
-  double Kp = 0.04;
+  double Kp = 0.2;
   double Ki= 0.01;
-  double Kd = 10;
+  double Kd = 8;
 
   float val;
   if (argc > 1) {

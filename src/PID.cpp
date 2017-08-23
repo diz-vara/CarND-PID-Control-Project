@@ -20,7 +20,7 @@ void PID::Init(double _Kp, double _Ki, double _Kd) {
     dKd = Kd / 5.;
 
     idx = 0;
-    cnt = -2; //to skip first steps
+    cnt = -100; //to skip first steps
     sum_err = 0;
     sum_sqerr = 0;
     diff_err = 0;
@@ -45,7 +45,7 @@ void PID::UpdateError(double cte) {
 
 double PID::TotalError() {
     //skip straight paths
-    if (curr_err * curr_err > 1e-5 ) {
+    if (curr_err * curr_err > 7e-2 ) {
         //to skip initial points
         if (cnt >= 0)
             sum_sqerr += curr_err * curr_err;
