@@ -31,7 +31,7 @@ void PID::Init(double _Kp, double _Ki, double _Kd) {
     pK[0]  = &Kp;   pK[1] = &Ki;   pK[2] = &Kd;
     pdK[0] = &dKp; pdK[1] = &dKi; pdK[2] = &dKd;
     
-    period = 300;
+    period = 400;
     bNeg = false;
 }
 
@@ -44,10 +44,14 @@ void PID::UpdateError(double cte) {
 }
 
 double PID::TotalError() {
-    //to skip initial points
-    if (cnt >= 0)
-        sum_sqerr += curr_err * curr_err;
-    if (period < 5000 && cnt++ >= period) {
+    //skip straight paths
+    if (curr_err * curr_err > 1e-5 ) {
+        //to skip initial points
+        if (cnt >= 0)
+            sum_sqerr += curr_err * curr_err;
+        cnt++;
+    }
+    if (period < 5000 && cnt >= period) {
         if (Twiddle()) //if the result is good
             period = period + period / 4;
     }

@@ -108,6 +108,8 @@ int main(int argc, char** argv)
           msgJson["steering_angle"] = steer_value;
 
           //updating throttle proportional to the cos(angle)
+          if (abs(angle) < abs(steer_value))
+            angle = steer_value;
           double cos_angle = cos(angle);
           msgJson["throttle"] = cos_angle * cos_angle * 0.85; // 0.3;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
