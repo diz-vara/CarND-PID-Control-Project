@@ -20,7 +20,7 @@ void PID::Init(double _Kp, double _Ki, double _Kd) {
     dKd = Kd / 5.;
 
     idx = 0;
-    cnt = -50; //to skip first steps at low speed
+    cnt = -2; //to skip first steps
     sum_err = 0;
     sum_sqerr = 0;
     diff_err = 0;
@@ -117,6 +117,10 @@ bool PID::Twiddle() {
 
 void PID::Restart()
 {
-    cnt = -100;
-    sum_sqerr = 0;
+    //this is a bad situation: stop current cycle with
+    // a very high error
+    cnt = period;
+    sum_err = 0;
+    diff_err = 0;
+    sum_sqerr = 1e9;
 }

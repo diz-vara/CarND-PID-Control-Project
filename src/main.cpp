@@ -89,7 +89,7 @@ int main(int argc, char** argv)
             msg_reset = "42[\"reset\",{}]";
             ws.send( msg_reset.data(), msg_reset.length(), uWS::OpCode::TEXT ); 
             maxSpeed = 0; 
-            //TODO: reset PID
+
             pid.Restart();
           }
 
