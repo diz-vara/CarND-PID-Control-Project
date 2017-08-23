@@ -82,7 +82,7 @@ int main(int argc, char** argv)
             maxSpeed = speed;
 
           //stopped: reset
-          if (cte > 5 || (speed < 10. && maxSpeed > 10.) ) {
+          if (cte > 10 || (speed < 5. && maxSpeed > 10.) ) {
             std::string msg_reset = "42[\"steer\",{\"steering_angle\":0, \"throttle\":1}]";
             std::cout << "Sending reset message " << msg_reset << std::endl;
             ws.send( msg_reset.data(), msg_reset.length(), uWS::OpCode::TEXT ); 
