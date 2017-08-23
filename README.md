@@ -1,92 +1,50 @@
-# CarND-Controls-PID
+# CarND-Controls-PID 
+
 Self-Driving Car Engineer Nanodegree Program
+
+# ReadMe
+
+---
+This repository contains my (Anton Varfolomeev) implementation of the PID-control project
 
 ---
 
-## Dependencies
+## Reflections on solution
 
-* cmake >= 3.5
- * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
-  * Run either `./install-mac.sh` or `./install-ubuntu.sh`.
-  * If you install from source, checkout to commit `e94b6e1`, i.e.
-    ```
-    git clone https://github.com/uWebSockets/uWebSockets 
-    cd uWebSockets
-    git checkout e94b6e1
-    ```
-    Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
-* Simulator. You can download these from the [project intro page](https://github.com/udacity/self-driving-car-sim/releases) in the classroom.
+There seems to be more heuristics and intuitions than rigorous mathematics in this project.
 
-There's an experimental patch for windows in this [PR](https://github.com/udacity/CarND-PID-Control-Project/pull/3)
+Short history of search (and results):
 
-## Basic Build Instructions
+* PID controller implementation (rather straightforward, UpdateError() and TotalError() methods of the PID class)
+* Manual PID parameters search. For it, I used three command line parameters (event without proper names, just numbers, sorry). 
+    The purpose was to find set of parameters to pass the whole loop. It took about half an hour to obtain 'working' numbers,
+    They were: 
 
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./pid`. 
+    ```Kp = 0.04, Ki = 0.01, Kd = 10```
 
-## Editor Settings
+* Throttle heuristics: I decided not to use PID - controller with some destination speed, but made throttle proportional 
+to the square of the cosine of the current angle. This implementation allows me to achieve the speed of 55 mph 
+on straight segments of the road - and to remain on the road on curves
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+    ``` throttle = cos(angle) * cos(angle) * 0.85 ```
+* Twiddle algorithms implementation (Twiddle() method of the PID class)
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+Then there was a long story of Twiddle optimization:
 
-## Code Style
+* While 'twiddling', it is possible that some set of parameters will send our car off the road. To continue training,
+we need to reset not only PID controller, but the simulator too. Thanks to the forums, I found the command to 
+perform the task
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+* At the beginning we can use rather short segments for coarse parameters update, but for fine-tuning it is better to use
+longer and longer segments. I achieve it by 20% 'twiddle period' increase on each 'total error' (MSE) decrease
 
-## Project Instructions and Rubric
+* When our car is on the straight segment, we can receive a lot of low CTE values, it will lead to the low MSE, which will 
+dominate all future errors and reduce the probability of new parameters acceptance. To prevent it, I pause MSE calculation
+on straight segments (when CTE is low).
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
-
-## Hints!
-
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
+### Note to the reviewer:
+Due to the implementation differences, the same controller with the same parameters will show different results
+on different computers.
+I assigned default values so that it works on three different machines (one of them Ubuntu 16.04, and two 
+others - Windows 10 with Ubuntu shell) - but I am not sure if it will work on your system.
+  
